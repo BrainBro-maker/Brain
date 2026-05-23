@@ -1,0 +1,536 @@
+https://github.com/BrainBro-maker/Brain.git
+# ==========================================================
+# EQUILIBRIO EMOCIONAL Y MACHINE LEARNING
+# Modelo dinámico inspirado en redes neuronales
+# ==========================================================
+
+# ----------------------------------------------------------
+# IMPORTACIÓN DE LIBRERÍAS
+# ----------------------------------------------------------
+
+import numpy as np
+import matplotlib.pyplot as plt
+
+
+# ==========================================================
+# 1. DOMINIOS VITALES
+# ==========================================================
+
+"""
+Cada dominio representa un área importante de la vida.
+
+Estos dominios funcionan como las "features"
+o variables de entrada en Machine Learning.
+"""
+
+domains = [
+"Relaciones",
+"Trabajo",
+"Salud",
+"Ocio",
+"Obligaciones"
+]
+
+n = len(domains)
+
+
+# ==========================================================
+# 2. PARÁMETROS GENERALES DEL MODELO
+# ==========================================================
+
+"""
+T -> tiempo total de simulación
+
+E_target -> equilibrio emocional funcional deseado
+"""
+
+T = 120
+E_target = 0.6
+
+
+# ==========================================================
+# 3. FUNCIÓN EMOCIONAL
+# ==========================================================
+
+def emotional_state(x, w):
+
+"""
+Calcula el estado emocional global.
+
+Fórmula:
+E(t) = tanh( Σ w_i * x_i )
+
+x_i -> intensidad emocional de cada dominio
+w_i -> peso subjetivo o importancia psicológica
+
+tanh() limita saturaciones extremas
+y simula regulación biológica.
+"""
+
+return np.tanh(np.dot(w, x))
+
+
+# ==========================================================
+# 4. FUNCIÓN DE SIMULACIÓN
+# ==========================================================
+
+def simulate(profile_name, eta, alpha, gamma):
+
+"""
+profile_name -> nombre del perfil psicológico
+
+eta -> flexibilidad psicológica
+alpha -> nivel de rumiación
+gamma -> capacidad reguladora/intervención
+"""
+
+# ------------------------------------------------------
+# ESTADO INICIAL
+# ------------------------------------------------------
+
+"""
+x representa la intensidad emocional
+de cada dominio vital.
+
+Valores positivos:
+estabilidad o satisfacción.
+
+Valores negativos:
+malestar emocional.
+"""
+
+x = np.array([
+0.5, # Relaciones
+0.6, # Trabajo
+0.7, # Salud
+0.6, # Ocio
+0.5 # Obligaciones
+])
+
+# ------------------------------------------------------
+# PESOS INICIALES
+# ------------------------------------------------------
+
+"""
+Atención distribuida de forma equilibrada.
+
+Restricción:
+Σ w_i = 1
+
+La atención es un recurso limitado.
+"""
+
+w = np.ones(n) / n
+
+# ------------------------------------------------------
+# HISTÓRICOS
+# ------------------------------------------------------
+
+E_history = []
+W_history = []
+X_history = []
+
+# ======================================================
+# EVOLUCIÓN TEMPORAL
+# ======================================================
+
+for t in range(T):
+
+# --------------------------------------------------
+# EVENTO NEGATIVO
+# --------------------------------------------------
+
+"""
+En t = 10 ocurre una ruptura sentimental.
+
+El dominio Relaciones
+se vuelve intensamente negativo.
+"""
+
+if t == 10:
+x[0] = -1.2
+
+# --------------------------------------------------
+# ESTADO EMOCIONAL GLOBAL
+# --------------------------------------------------
+
+E = emotional_state(x, w)
+
+# --------------------------------------------------
+# FUNCIÓN DE PÉRDIDA
+# --------------------------------------------------
+
+"""
+El sistema intenta mantenerse
+cerca del equilibrio funcional.
+"""
+
+loss = (E - E_target) ** 2
+
+# --------------------------------------------------
+# GRADIENTE
+# --------------------------------------------------
+
+"""
+Inspirado en descenso de gradiente.
+
+El sistema reajusta pesos
+para reducir desequilibrio.
+"""
+
+grad_w = 2 * (E - E_target) * x
+
+# --------------------------------------------------
+# ACTUALIZACIÓN DE PESOS
+# --------------------------------------------------
+
+w = w - eta * grad_w
+
+# --------------------------------------------------
+# REGULARIZACIÓN
+# --------------------------------------------------
+
+"""
+Evita pesos extremos.
+
+Equivalente psicológico:
+hábitos, apoyo social,
+regulación emocional.
+"""
+
+w = np.clip(w, 0.01, 1.0)
+
+# --------------------------------------------------
+# NORMALIZACIÓN
+# --------------------------------------------------
+
+"""
+Garantiza:
+
+Σ w_i = 1
+"""
+
+w = w / np.sum(w)
+
+# --------------------------------------------------
+# RUMIACIÓN
+# --------------------------------------------------
+
+"""
+Retroalimentación positiva.
+
+Cuanto más peso tiene algo,
+más aumenta su impacto emocional.
+"""
+
+x = x + alpha * w * x
+
+# --------------------------------------------------
+# INTERVENCIÓN / TERAPIA
+# --------------------------------------------------
+
+"""
+A partir de t > 50:
+
+el sistema comienza a redistribuir
+atención fuera de relaciones.
+"""
+
+if t > 50:
+
+w[0] -= gamma
+
+w = np.clip(w, 0.01, 1.0)
+w = w / np.sum(w)
+
+# --------------------------------------------------
+# RUIDO BIOLÓGICO (OPCIONAL)
+# --------------------------------------------------
+
+"""
+Simula variabilidad emocional real.
+"""
+
+# x = x + np.random.normal(0, 0.01, size=n)
+
+# --------------------------------------------------
+# GUARDAR HISTÓRICOS
+# --------------------------------------------------
+
+E_history.append(E)
+W_history.append(w.copy())
+X_history.append(x.copy())
+
+return (
+np.array(E_history),
+np.array(W_history),
+np.array(X_history)
+)
+
+
+# ==========================================================
+# 5. DEFINICIÓN DE PERFILES
+# ==========================================================
+
+# ----------------------------------------------------------
+# PERFIL RESILIENTE
+# ----------------------------------------------------------
+
+"""
+Características:
+
+- alta flexibilidad
+- baja rumiación
+- buena regulación
+"""
+
+E_res, W_res, X_res = simulate(
+profile_name="Resiliente",
+eta=0.08,
+alpha=0.05,
+gamma=0.03
+)
+
+# ----------------------------------------------------------
+# PERFIL RUMIATIVO
+# ----------------------------------------------------------
+
+"""
+Características:
+
+- baja flexibilidad
+- alta rumiación
+- menor regulación
+"""
+
+E_rum, W_rum, X_rum = simulate(
+profile_name="Rumiativo",
+eta=0.03,
+alpha=0.20,
+gamma=0.01
+)
+
+
+# ==========================================================
+# 6. VISUALIZACIONES
+# ==========================================================
+
+# ----------------------------------------------------------
+# GRÁFICA 1
+# ESTADO EMOCIONAL GLOBAL
+# ----------------------------------------------------------
+
+plt.figure(figsize=(8, 5))
+
+plt.plot(E_res, label="Resiliente")
+plt.plot(E_rum, label="Rumiativo")
+
+plt.axhline(
+E_target,
+linestyle='--',
+label="Equilibrio funcional"
+)
+
+plt.title("Estado emocional global")
+
+plt.xlabel("Tiempo")
+plt.ylabel("E(t)")
+
+plt.legend()
+plt.grid(True)
+
+plt.show()
+
+
+# ----------------------------------------------------------
+# GRÁFICA 2
+# PESO EN RELACIONES
+# ----------------------------------------------------------
+
+plt.figure(figsize=(8, 5))
+
+plt.plot(
+W_res[:, 0],
+label="Relaciones - Resiliente"
+)
+
+plt.plot(
+W_rum[:, 0],
+label="Relaciones - Rumiativo"
+)
+
+plt.title("Peso emocional asignado a relaciones")
+
+plt.xlabel("Tiempo")
+plt.ylabel("Peso")
+
+plt.legend()
+plt.grid(True)
+
+plt.show()
+
+
+# ----------------------------------------------------------
+# GRÁFICA 3
+# DISTRIBUCIÓN FINAL DE PESOS
+# ----------------------------------------------------------
+
+plt.figure(figsize=(8, 5))
+
+x_axis = np.arange(n)
+
+plt.bar(
+x_axis - 0.2,
+W_res[-1],
+width=0.4,
+label="Resiliente"
+)
+
+plt.bar(
+x_axis + 0.2,
+W_rum[-1],
+width=0.4,
+label="Rumiativo"
+)
+
+plt.xticks(
+x_axis,
+domains,
+rotation=20
+)
+
+plt.ylabel("Peso")
+
+plt.title(
+"Distribución final de pesos emocionales"
+)
+
+plt.legend()
+plt.grid(True)
+
+plt.show()
+
+
+# ==========================================================
+# 7. INTERPRETACIÓN CONCEPTUAL
+# ==========================================================
+
+"""
+OVERFITTING EMOCIONAL
+---------------------
+Un único dominio domina el sistema.
+
+Ejemplo:
+ruptura sentimental -> ocupa toda la atención.
+
+
+UNDERFITTING EMOCIONAL
+----------------------
+Desconexión emocional generalizada.
+
+
+REGULARIZACIÓN
+---------------
+Hábitos saludables,
+descanso,
+actividad física,
+terapia,
+redes sociales positivas.
+
+
+ATENCIÓN LIMITADA
+-----------------
+Dar demasiado peso a algo
+implica descuidar otros dominios.
+
+
+RUMIACIÓN
+----------
+Retroalimentación positiva:
+
+pensar más -> más impacto ->
+más atención -> más pensamiento.
+
+
+RESILIENCIA
+------------
+Capacidad del sistema
+para redistribuir pesos
+y recuperar estabilidad.
+"""
+
+
+# ==========================================================
+# 8. INTERPRETACIÓN NEUROCIENTÍFICA
+# ==========================================================
+
+"""
+Los pesos w_i pueden interpretarse como:
+
+- saliencia neuronal
+- prioridad cognitiva
+- eficacia funcional de redes
+
+Relaciones con neurotransmisores:
+
+DOPAMINA
+---------
+Refuerzo y aprendizaje.
+
+
+SEROTONINA
+-----------
+Estabilidad emocional
+y regulación del ánimo.
+
+
+CORTISOL
+---------
+Sesgo negativo asociado
+a estrés crónico.
+
+
+NORADRENALINA
+--------------
+Alerta,
+vigilancia,
+respuesta adaptativa.
+
+
+También conecta con:
+
+- plasticidad sináptica
+- redes de saliencia
+- control ejecutivo
+- regulación emocional cortical
+"""
+
+
+# ==========================================================
+# 9. EXTENSIONES FUTURAS
+# ==========================================================
+
+"""
+1. Integrar neurotransmisores dinámicos
+
+2. Añadir fatiga cognitiva
+
+3. Redes de saliencia cerebrales
+
+4. Crear interfaz interactiva
+
+5. Entrenamiento con datos reales
+
+6. Aplicaciones STEAM
+
+7. Apps de bienestar emocional
+
+8. Modelos híbridos IA-psicología
+"""
+
+
+# ==========================================================
+# FIN
+# ==========================================================
+
+print("Simulación completada correctamente.")
